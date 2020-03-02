@@ -1,0 +1,176 @@
+ ---
+title: "Experimenting with Disturbances"
+author: "Kalyn Dorheim"
+date: "2/24/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, message = FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ed4forte)
+
+RESULTS_DIR <- here::here("Disturbence Events", 'ED2.2 practice-disturbance')
+```
+## Objectives 
+
+My objectives over the past two weeks were to 
+1. Get ED running on pic (in progress not working)
+2. Start experimenting with disturbence events (in progress we've got some preliminary results)
+3. Set up a UMBS run (did not start)
+
+I've been unable to get ed running on pic, among other issues that have been resolved ED is unable to run because of the way that the hdf5 library was set up. Hopefully that is something can be worked out this week. I do have some disturbence run results to look at but was unable to start working on task number 3. 
+
+## Disturbence Events
+
+Disturbences or harvests are applied to an ED run with an event xml file that looks something like 
+```
+<?xml version="1.0"?>
+<!DOCTYPE config SYSTEM "ed_event.dtd">
+<eventlist>
+  <event>
+    <year> 2002 </year>
+    <doy> 187 </doy>
+    <harvest>
+      <agb_frac> 0.3 </agb_frac>
+      <bgb_frac> 0.3 </bgb_frac>
+      <fol_frac> 0.3 </fol_frac>
+      <stor_frac> 0.3 </stor_frac>
+    </harvest>
+  </event>
+</eventlist>
+````
+
+Where the a fraction of some cohort biomass can be removed, `agb_frac` (above ground biomass), `bgb_frac` (below ground biomass), `fol_frac` (foliar) and `stor_frac` (storage). Based on some reading (there is more to be done) of Moorcorft et al. 2001 (original ed documentation paper) the probablity tree mortality is determined by the age of the tree relative to species longevity but then also the indiviudal trees carbon balance. From what I can tell the disturbence events remove some portion of a tree's biomass thereby altering the carbon balance and increasing the probability of tree mortality. Alexey says that these disturbence events are not species specific, in theory they could be but that woudl require model devlopment. However in Dietze and Matthes 2014 they looked at speices specifc results. 
+
+Outstanding Disturbance Event Questions 
+
+* Is the fraction applied to all trees in a patch or is it applied to some of the trees in a patch? 
+* How did Dietze and Matthes 2014 model the different forst insects and pathogen events? The SI material is a list of ED parameter names but does not descripbe how the fraction parameters were perscribed to the different insect and pathogen events. Do we want to contact them? 
+* What output variables do we want to look at? Right now I'm plotting NPP and LAI. 
+
+
+
+## Preliminary Results 
+
+In this section looks at LAI and NPP from four runs, a baseline scenario and then a 30%, 60%, and 90% distrubence event scenarios. In each distrubence event the fraction is applied uniformly across all plant biomass pools, although in theory we could apply a disturbence events that affects the different carbon pools uniquely. 
+
+
+### Formatting Output 
+
+Because of the way that ED writes output there is a bit work that has to be done before the results can be plotted. I am still trying to decide what the best work flow is going to be for extracting and formating ED results. 
+
+```{r}
+# Import and select the data to plot for the disturbence run 
+# 
+# Args
+#   scn: a vector of the scneario directory name that contains the extracted monthly data 
+#   vars: a vector of the variables to extract from the nested list of results.
+# Returns a data frame of the results at each cohort
+# TODO write something like this but more effient and works with the different result resolutions. 
+import_select_data <- function(scn, vars){
+  
+  results <- readRDS(file.path(RESULTS_DIR, scn, 'monthly-output.rds'))
+
+bind_rows(lapply(results[2:5], function(input){
+  any(vars %in% names(input[[1]])) 
+  })) %>%  
+  unlist %>% 
+  which(isTRUE(.)) %>% 
+  names -> 
+  df_selection
+
+
+data <- results[[df_selection]][[1]] 
+cols <- names(data) %in% c('datetime', vars)
+df   <- data[, cols]
+
+info <- ed2_variable_info()[names(ed2_variable_info()) %in% c('variable', 'unit')]
+
+
+mapply(function(x, step){
+  index <- paste0(step, letters)
+  x$index <-  index[1:nrow(x)]
+  x
+}, 
+       x = split(df, df$datetime), 
+       step = 1:length(unique(df$datetime)), SIMPLIFY = FALSE) %>% 
+  bind_rows() %>%  
+  gather(variable, value, -datetime, -index) %>% 
+  inner_join(info, by = 'variable') %>% 
+  mutate(name = scn) 
+}
+
+
+# Extract the results for each scenario and save into a single data frame. 
+scns <- list.files(RESULTS_DIR)
+vars <- c('MMEAN_NPPDAILY_CO', 'MMEAN_LAI_CO', 'NPLANT')
+results <- bind_rows(lapply(scns, import_select_data, vars = vars)) 
+
+# Because we have different NPP and LAI results for each cohort I think what will 
+# be simpelest is to take the weighted avreage of NPP and LAI by the number of 
+# plants in each cohort. But I am not sure if this is right, this is something to 
+# dicuss with BBL. 
+results %>%  
+  select(datetime, variable, value, name, index) %>% 
+  spread(variable, value) %>% 
+  gather(variable, value, MMEAN_LAI_CO, MMEAN_NPPDAILY_CO) %>% 
+  split(., interaction(.$variable, .$datetime, .$name)) %>%  
+  lapply(function(input){
+    
+    value <- weighted.mean(x = input[['value']], w = input[['NPLANT']])
+    datetime <- unique(input[['datetime']])
+    variable <- unique(input[['variable']])
+    name     <- unique(input[['name']])
+    tibble::tibble(datetime = datetime, 
+                   variable = variable, 
+                   value = value, 
+                   name = name)
+    
+  }) %>% 
+  bind_rows() -> 
+  weighted_means
+
+
+# Rename the scenarios to reflect the event file. 
+weighted_means %>% 
+  mutate(name = if_else(name == "mortality1-ed-outputs", '30% harvest', name), 
+         name = if_else(name == "mortality2-ed-outputs", '60% harvest', name), 
+         name = if_else(name == "mortality3-ed-outputs", '90% harvest', name))  -> 
+  weighted_means
+```
+
+
+
+```{r}
+weighted_means %>% 
+  filter(variable == 'MMEAN_LAI_CO') %>% 
+  ggplot(aes(datetime, value, color = name)) + 
+  geom_line() +
+  labs(title = 'Monthly Mean LAI', 
+       y = 'm2leaf/m2')
+```
+
+
+```{r}
+weighted_means %>% 
+  filter(variable == 'MMEAN_NPPDAILY_CO') %>% 
+  ggplot(aes(datetime, value, color = name)) + 
+  geom_line() +
+  labs(title = 'Monthly Mean NPP', 
+       y = 'kgC/m2/yr')
+```
+
+
+
+#### Dicussion 
+
+* How do we want to look at output? Should it be by cohort or is the weighted cohort mean okay? 
+* What are the next steps for the distrubence? 
+    - I think that we are probably going to need to figure out if it is individual trees or some portion within the patch / cohort 
+    - Do we want to try to contact Deitz? 
+    - What graphs would be useful to take to the FoRTE meeting in March? 
+    - What systematic distrubent events do we need to look at? Anything that Lisa might be interested in? 
+

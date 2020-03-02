@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE config SYSTEM "ed_event.dtd">
+<eventlist>
+  <event>
+    <year> 2002 </year>
+    <doy> 187 </doy>
+    <harvest>
+      <agb_frac> 0.3 </agb_frac>
+      <bgb_frac> 0.3 </bgb_frac>
+      <fol_frac> 0.3 </fol_frac>
+      <stor_frac> 0.3 </stor_frac>
+    </harvest>
+  </event>
+</eventlist>
