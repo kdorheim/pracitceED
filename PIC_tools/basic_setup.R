@@ -168,3 +168,8 @@ case <- cases[[1]]
 
 # Generate the ED Input Structure  -----------------------------------------------------------
 setup_run(case = case, default = FALSE)
+
+# RUN ED
+# !/bin/bash
+# cd /qfs/people/dorh012/forte-workflow/testing-ensemble/forte-ed-runs/cases/001CTS/
+# /people/dorh012/ed-source-code/ed_2.2-opt ./ED2IN
