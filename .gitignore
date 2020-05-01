@@ -14,3 +14,5 @@ ed-input-data/*
 *.rds 
 *.txt
 .DS_Store
+*.Rproj
+unsynced-data/**
