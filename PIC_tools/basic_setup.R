@@ -32,6 +32,7 @@ setup_run <- function(case, default = FALSE){
   # Create the DIR to store the data in. 
   if(default){
     casename <- sprintf("%03d%s", case$param_id, case$case)
+    #casename <- paste0(casename, 'xxx')
     outdir   <- file.path(local_basedir, "forte-ed-runs", "cases", 'default')
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
     config_path <- ""
@@ -42,6 +43,7 @@ setup_run <- function(case, default = FALSE){
     assertthat::assert_that(all(c('param_id', 'case') %in% names(case)))
     
     casename <- sprintf("%03d%s", case$param_id, case$case)
+    casename <- paste0(casename, 'xxx')
     outdir   <- file.path(local_basedir, "forte-ed-runs", "cases", casename)
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
     
@@ -69,7 +71,7 @@ setup_run <- function(case, default = FALSE){
     # Start and end date  
     # TODO should these be hard coded in? 
     IYEARA = 1994, IMONTHA = 6, IDATEA = 1,
-    IYEARZ = 1998, IMONTHZ = 1, IDATEZ = 1,
+    IYEARZ = 1995, IMONTHZ = 1, IDATEZ = 1,
     
     # Site information 
     POI_LAT = 45.5625, POI_LON = -84.6975,
@@ -107,7 +109,7 @@ setup_run <- function(case, default = FALSE){
     
     # Intergration solver set up
     INTEGRATION_SCHEME = 1, # Runge–Kutta integration solver
-    RK4_TOLERANCE = 1e-7,   # The tolerence for the integration solver, only applicable for Runge–Kutta
+    RK4_TOLERANCE = 1e-6,   # The tolerence for the integration solver, only applicable for Runge–Kutta
     
     # Output file set up (0 means no 3 means HDF5 output)
     IMOUTPUT = 3,      # Return monthly means, 1 HDF5 file per month
@@ -121,8 +123,9 @@ setup_run <- function(case, default = FALSE){
   ed2in <- modifyList(ed2in_template, ed2in_tags)
   
   # Write the ed2 in file out 
-  write_ed2in(ed2in, file.path(outdir, "ED2IN"), barebones = TRUE) 
-  invisible(outdir)
+  file <- file.path(outdir, "ED2IN")
+  write_ed2in(ed2in, file, barebones = TRUE) 
+  file
   
   
 }
@@ -168,8 +171,8 @@ case <- cases[[1]]
 
 # Generate the ED Input Structure  -----------------------------------------------------------
 setup_run(case = case, default = FALSE)
-
+print('done!')
 # RUN ED
 # !/bin/bash
-# cd /qfs/people/dorh012/forte-workflow/testing-ensemble/forte-ed-runs/cases/001CTS/
+# cd /qfs/people/dorh012/forte-workflow/testing-ensemble/forte-ed-runs/cases/001CTSxxx/ED2IN
 # /people/dorh012/ed-source-code/ed_2.2-opt ./ED2IN
