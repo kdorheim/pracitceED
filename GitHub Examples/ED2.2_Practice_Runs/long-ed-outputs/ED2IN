@@ -72,11 +72,11 @@ $ED_NL
    NL%SLZ = -3,-2,-1,-0.6,-0.3,-0.15,-0.05
    NL%SLMSTR = 0.06,0.173,0.466,0.365,0.612,0.633,0.561
    NL%STGOFF = 0,0,0,0,0,0,0
-   NL%VEG_DATABASE = '/Users/dorh012/Library/R/3.5/library/ed4forte/ed-inputs-common/veg-oge/OGE2_'
+   NL%VEG_DATABASE = '/Users/dorh012/Documents/2020/ed4forte/inst/ed-inputs-common/veg-oge/OGE2_'
    NL%SOIL_DATABASE = ''
    NL%LU_DATABASE = ''
    NL%PLANTATION_FILE = ''
-   NL%THSUMS_DATABASE = '/Users/dorh012/Library/R/3.5/library/ed4forte/ed-inputs-common/chd-dgd/'
+   NL%THSUMS_DATABASE = '/Users/dorh012/Documents/2020/ed4forte/inst/ed-inputs-common/chd-dgd/'
    NL%ED_MET_DRIVER_DB = 'ed-input-data/NARR-ED2/ED_MET_DRIVER_HEADER'
    NL%OBSTIME_DB = ''
    NL%SOILSTATE_DB = ''

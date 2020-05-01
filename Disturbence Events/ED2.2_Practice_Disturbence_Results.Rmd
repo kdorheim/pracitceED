@@ -120,7 +120,8 @@ results %>%
   split(., interaction(.$variable, .$datetime, .$name)) %>%  
   lapply(function(input){
     
-    value <- weighted.mean(x = input[['value']], w = input[['NPLANT']])
+   # value <- weighted.mean(x = input[['value']], w = input[['NPLANT']])
+    value <- sum(input[['value']])
     datetime <- unique(input[['datetime']])
     variable <- unique(input[['variable']])
     name     <- unique(input[['name']])
@@ -148,9 +149,12 @@ weighted_means %>%
 weighted_means %>% 
   filter(variable == 'MMEAN_LAI_CO') %>% 
   ggplot(aes(datetime, value, color = name)) + 
-  geom_line() +
-  labs(title = 'Monthly Mean LAI', 
-       y = 'm2leaf/m2')
+  geom_line(size = 1.5) +
+  labs(title = 'Monthly Mean LAI\n(Patch Total)', 
+       y = 'm2leaf/m2', 
+       x = 'Date Time by Months') + 
+  theme_bw(base_size = 18) + 
+  theme(legend.title =  element_blank())
 ```
 
 
@@ -158,9 +162,13 @@ weighted_means %>%
 weighted_means %>% 
   filter(variable == 'MMEAN_NPPDAILY_CO') %>% 
   ggplot(aes(datetime, value, color = name)) + 
-  geom_line() +
-  labs(title = 'Monthly Mean NPP', 
-       y = 'kgC/m2/yr')
+  geom_line(size = 1.5) +
+  labs(title = 'Monthly Average Daily NPP\n(Patch total)', 
+       y = 'kgC/m2/yr', 
+              x = 'Date Time by Months') + 
+  theme_bw(base_size = 18) + 
+  theme(legend.title =  
+          element_blank())
 ```
 
 

@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.h5
+*.log
+*config.xml
+*history.xml
+*ED2IN
+Notes and Misc Resources/*
+ed-input-data/*
+*.xml
+*.Rmd
+*.rds 
+*.txt
+.DS_Store

@@ -1,4 +1,8 @@
-## ED2.2_Pracitce_Distrubence
+## ED2.2_NonHarvest 
+## Looking at events.f90 it looks like there are mulitple types of distrubences that can occur. 
+## The purpose of this script is to look at the different types of disturbences we can use to 
+## perturb ED. 
+
 ## Ths purpose of this script is to explore the harvest events. How can we perscibe disturbence events?
 library('ed4forte')
 library(dplyr)
@@ -12,7 +16,7 @@ options(ed4forte.ed2_exe = exe_path)
 ed_input_dir <- "ed-input-data" 
 assertthat::assert_that(dir.exists("ed-input-data"))
 
-output_dir <- file.path(here::here(), 'Disturbence Events', 'ED2.2 practice-disturbance')
+output_dir <- file.path(here::here(), 'Disturbence Events', 'ED2.2 NonHarvest')
 dir.create(output_dir)
 
 # A1. Baseline Run ------------------------------------------------------------------------------------
@@ -29,10 +33,10 @@ p$wait()
 results_baseline  <- read_monthly_dir(results_dir)
 
 # A2. mortatlity1  -------------------------------------------------------------------------------
-event_xml <- here::here('Disturbence Events', 'events', 'mortality1.xml')
+event_xml <- here::here('Disturbence Events', 'events', 'thinning1.xml')
 assertthat::assert_that(file.exists(event_xml))
 
-results_dir <- file.path(output_dir, "mortality1-ed-outputs")
+results_dir <- file.path(output_dir, "thinning-ed-outputs")
 dir.create(results_dir)
 
 p <- run_ed2( results_dir,

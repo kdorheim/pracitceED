@@ -11,8 +11,8 @@
 ## run it is pretty annoying to have to do that 
 
 # 0. Set Up -------------------------------------
-library(ed4forte)
-#devtools::load_all('~/Documents/2020/ed4forte/')
+#library(ed4forte)
+devtools::load_all('~/Documents/2020/ed4forte/')
 library(dplyr)
 library(tidyr)
 library(ggplot2)
