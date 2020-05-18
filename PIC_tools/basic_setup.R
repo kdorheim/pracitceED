@@ -8,6 +8,9 @@ library(tidyr)
 library(readr)
 library(udunits2) # Inorder to install on pic on R/3.4.3 had to contact pic (support because it required specific pacakge dependencies.)
 
+setwd('/qfs/people/dorh012/forte-workflow/testing-ensemble/')
+
+
 # Because of some werid depency issues on pic it is difficult to build and 
 # install the pecan porject but certain functions can become avaiable by sourcing them! 
 # TODO is is possible to install the pecan package with udunits2 installed now? 
@@ -43,7 +46,7 @@ setup_run <- function(case, default = FALSE){
     assertthat::assert_that(all(c('param_id', 'case') %in% names(case)))
     
     casename <- sprintf("%03d%s", case$param_id, case$case)
-    casename <- paste0(casename, 'xxx')
+   # casename <- paste0(casename, 'xxx')
     outdir   <- file.path(local_basedir, "forte-ed-runs", "cases", casename)
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
     
@@ -70,8 +73,11 @@ setup_run <- function(case, default = FALSE){
   ed2in_tags <- list(
     # Start and end date  
     # TODO should these be hard coded in? 
-    IYEARA = 1994, IMONTHA = 6, IDATEA = 1,
-    IYEARZ = 1995, IMONTHZ = 1, IDATEZ = 1,
+    IYEARA = 1979, IMONTHA = 6, IDATEA = 1,
+    IYEARZ = 2019, IMONTHZ = 6, IDATEZ = 1,
+    
+    # The first and last year of met data. 
+    METCYC1 = 1979, METCYCF = 2019, 
     
     # Site information 
     POI_LAT = 45.5625, POI_LON = -84.6975,
@@ -89,7 +95,7 @@ setup_run <- function(case, default = FALSE){
     
     LU_DATABASE = file.path(remote_input_dir, "EDI", "ed_inputs", "glu"),
     THSUMS_DATABASE = file.path(remote_input_dir, "EDI", "ed_inputs/"),
-    ED_MET_DRIVER_DB = file.path(remote_input_dir, "met", "CUSTOM_ED2_site_1-33", "ED_MET_DRIVER_HEADER"),
+    ED_MET_DRIVER_DB = file.path(remote_input_dir, "met2", "NARR-ED2", "ED_MET_DRIVER_HEADER"),
     
     # UMBS soil characteristics (from Gough et al. 2010 FEM)
     NSLCON = 1, # Sand
@@ -154,7 +160,7 @@ param_nest <- param_draws %>% nest(-param_id)
 structures <- tibble(
   crown_model = c(FALSE),
   multiple_scatter = c(FALSE),
-  trait_plasticity = c( FALSE)
+  trait_plasticity = c(FALSE)
 ) %>%
   expand(., !!!(syms(colnames(.)))) %>%
   mutate(case = paste0(
@@ -172,7 +178,4 @@ case <- cases[[1]]
 # Generate the ED Input Structure  -----------------------------------------------------------
 setup_run(case = case, default = FALSE)
 print('done!')
-# RUN ED
-# !/bin/bash
-# cd /qfs/people/dorh012/forte-workflow/testing-ensemble/forte-ed-runs/cases/001CTSxxx/ED2IN
-# /people/dorh012/ed-source-code/ed_2.2-opt ./ED2IN
+
